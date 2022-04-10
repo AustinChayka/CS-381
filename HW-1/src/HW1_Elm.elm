@@ -3,24 +3,32 @@ module HW1_Elm exposing (..)
 import HW1_Def exposing (..)
 
 --Part 1
-{--
+
 ins : a -> Bag a -> Bag a
-ins n b = 
-    if List.member n (map fst b) then
-        map (\(x, n2) -> if n2 == n then (x, n2 + 1) else (x, n2)) b
-    else
-        (n, 1)::b
+ins x b = case b of
+    [] -> (x, 1)::[]
+    (y, n)::ys -> if y == x then ((y, n + 1)::ys) else (y, n)::(ins x ys)
+
 
 del : a -> Bag a -> Bag a
-del x b = map (\(x2, n) -> if x2 == x then (if n > 1 then (x2, n - 1)) else (x2, n)) b
+del x b = case b of
+    (bx, n)::bs -> if bx == x then (if n == 1 then del x bs else (bx, n - 1)::(del x bs)) else (bx, n)::(del x bs)
+    [] -> []
 
 bag : List a -> Bag a
 bag l = case l of
---}
+    [] -> []
+    x::xs -> ins x (bag xs)
 
+subitem : (a, Int) -> Bag a -> Bool
+subitem (x, n) b = case b of
+    [] -> False
+    (y, m)::ys -> if (y == x && n <= m) then True else subitem (x, n) ys
+    
 subbag : Bag a -> Bag a -> Bool
-subbag b1 b2 = 
-    map (\(x1, n1) -> ) b2
+subbag b1 b2 = case b1 of 
+    [] -> True
+    (x, n)::xs -> (subitem (x, n) b2) && (subbag xs b2)
 
 isSet : Bag a -> Bool
 isSet b =
@@ -32,14 +40,19 @@ size b =
 
 -- Part 2
 
---nodes : Graph -> List Node
+nodes : Graph -> List Node
+nodes g = asSet((map fst g) ++ (map snd g))
+
 
 suc : Node -> Graph -> List Node
 suc n g = g
     |> filter (\e -> (fst e) == n)
     |> map snd
 
---detach : Node -> Graph -> Graph
+detach : Node -> Graph -> Graph
+detach n g = case g of
+    [] -> []
+    (n1, n2)::nx -> if (n1 == n || n2 == n) then (detach n nx) else (n1, n2)::(detach n nx)
 
 -- Part 3
 
